@@ -79,6 +79,10 @@ st.markdown(
             border-radius: 10px;
             padding: 16px 20px;
             transition: transform 0.2s ease, border-color 0.2s ease;
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         [data-testid="stMetric"]:hover {
             transform: translateY(-2px);
@@ -99,8 +103,12 @@ st.markdown(
             background: rgba(26, 31, 46, 0.5);
             border-radius: 10px;
             padding: 4px;
+            width: 100%;
         }
         .stTabs [data-baseweb="tab"] {
+            flex-grow: 1;
+            text-align: center;
+            justify-content: center;
             border-radius: 8px;
             padding: 10px 20px;
             font-weight: 500;

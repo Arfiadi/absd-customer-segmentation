@@ -94,7 +94,7 @@ def _render_key_takeaways() -> None:
                 border-radius: 10px;
                 padding: 20px;
                 border: 1px solid {CLUSTER_COLORS[2]}40;
-                height: 100%;
+                min-height: 220px;
             ">
                 <h4 style="color:{CLUSTER_COLORS[2]};">💰 Fokus Profit</h4>
                 <p style="color:#ccc; line-height:1.6;">
@@ -116,7 +116,7 @@ def _render_key_takeaways() -> None:
                 border-radius: 10px;
                 padding: 20px;
                 border: 1px solid {CLUSTER_COLORS[3]}40;
-                height: 100%;
+                min-height: 220px;
             ">
                 <h4 style="color:{CLUSTER_COLORS[3]};">📦 Fokus Volume</h4>
                 <p style="color:#ccc; line-height:1.6;">
@@ -137,7 +137,7 @@ def _render_key_takeaways() -> None:
                 border-radius: 10px;
                 padding: 20px;
                 border: 1px solid {CLUSTER_COLORS[0]}40;
-                height: 100%;
+                min-height: 220px;
             ">
                 <h4 style="color:{CLUSTER_COLORS[0]};">📉 Efisiensi Anggaran</h4>
                 <p style="color:#ccc; line-height:1.6;">

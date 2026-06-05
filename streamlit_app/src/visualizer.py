@@ -92,6 +92,7 @@ def create_cluster_bar(df: pd.DataFrame) -> go.Figure:
     counts = df["Cluster"].value_counts().sort_index()
     names = [f"C{i}: {CLUSTER_PERSONAS[i]['name']}" for i in counts.index]
     colors = [CLUSTER_COLORS[i] for i in counts.index]
+    max_count = counts.max()
 
     fig = go.Figure(
         data=[
@@ -113,7 +114,11 @@ def create_cluster_bar(df: pd.DataFrame) -> go.Figure:
         fig,
         title="Jumlah Pelanggan per Cluster",
         xaxis=dict(title="Cluster"),
-        yaxis=dict(title="Jumlah Pelanggan", gridcolor="rgba(255,255,255,0.1)"),
+        yaxis=dict(
+            title="Jumlah Pelanggan",
+            gridcolor="rgba(255,255,255,0.1)",
+            range=[0, max_count * 1.15],
+        ),
         height=420,
     )
     return fig
@@ -312,6 +317,7 @@ def create_spending_breakdown(df: pd.DataFrame, cluster_id: int) -> go.Figure:
     global_mean = df[available].mean()
     cluster_mean = df[df["Cluster"] == cluster_id][available].mean()
     persona = CLUSTER_PERSONAS[cluster_id]
+    max_val = max(global_mean.max(), cluster_mean.max()) if len(available) > 0 else 0
 
     # Clean labels
     labels = [c.replace("Mnt", "").replace("Products", "").replace("Prods", "") for c in available]
@@ -343,7 +349,11 @@ def create_spending_breakdown(df: pd.DataFrame, cluster_id: int) -> go.Figure:
         title=f"Pengeluaran per Kategori — {persona['emoji']} {persona['name']}",
         barmode="group",
         xaxis=dict(title="Kategori Produk"),
-        yaxis=dict(title="Rata-rata Pengeluaran ($)", gridcolor="rgba(255,255,255,0.1)"),
+        yaxis=dict(
+            title="Rata-rata Pengeluaran ($)",
+            gridcolor="rgba(255,255,255,0.1)",
+            range=[0, max_val * 1.15] if max_val > 0 else None,
+        ),
         height=420,
     )
     return fig
@@ -448,6 +458,7 @@ def create_education_bar(df: pd.DataFrame, cluster_id: int) -> go.Figure:
 
     cluster_data = df[df["Cluster"] == cluster_id]
     counts = cluster_data[col].value_counts().sort_index()
+    max_count = counts.max() if len(counts) > 0 else 0
 
     fig = go.Figure(
         data=[
@@ -465,7 +476,11 @@ def create_education_bar(df: pd.DataFrame, cluster_id: int) -> go.Figure:
         fig,
         title=f"Tingkat Pendidikan — {persona['emoji']} {persona['name']}",
         xaxis=dict(title="Pendidikan"),
-        yaxis=dict(title="Jumlah", gridcolor="rgba(255,255,255,0.1)"),
+        yaxis=dict(
+            title="Jumlah",
+            gridcolor="rgba(255,255,255,0.1)",
+            range=[0, max_count * 1.15] if max_count > 0 else None,
+        ),
         height=380,
     )
     return fig
