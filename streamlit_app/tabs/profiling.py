@@ -111,10 +111,12 @@ def render(df: pd.DataFrame) -> None:
     """
     st.markdown("### 🗺️ Perbandingan Makro Profil Cluster")
     
-    col1, col2 = st.columns([6, 5])
+    col1, col2 = st.columns([7.5, 4.5])
     with col1:
+        st.markdown("<h4 style='margin:0 0 10px 0; font-size:1.1em; color:#FAFAFA; font-weight:600;'>Snake Plot — Perbandingan Tren Relatif</h4>", unsafe_allow_html=True)
         st.plotly_chart(create_snake_plot(df), use_container_width=True)
     with col2:
+        st.markdown("<h4 style='margin:0 0 10px 0; font-size:1.1em; color:#FAFAFA; font-weight:600;'>Heatmap Rata-rata Nilai Riil</h4>", unsafe_allow_html=True)
         st.plotly_chart(create_cluster_heatmap(df), use_container_width=True)
 
     st.divider()

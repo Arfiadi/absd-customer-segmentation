@@ -154,17 +154,27 @@ def create_snake_plot(df: pd.DataFrame) -> go.Figure:
     
     fig.update_traces(
         hovertemplate="<b>%{x}</b><br>Skor Relatif: %{y:.2f}<extra></extra>",
-        line=dict(width=3),
-        marker=dict(size=8)
+        line=dict(width=1.5),
+        marker=dict(size=5)
     )
 
     _apply_defaults(
         fig,
-        title="Snake Plot — Perbandingan Makro Profil Cluster",
-        xaxis=dict(title="", tickangle=-45, gridcolor="rgba(255,255,255,0.05)"),
-        yaxis=dict(title="Skor Normalisasi (0-1)", gridcolor="rgba(255,255,255,0.1)", range=[-0.05, 1.15]),
+        title=dict(text=""), # Hapus judul internal agar tidak tumpang tindih
+        xaxis=dict(title="", tickangle=-45, tickfont=dict(size=9), gridcolor="rgba(255,255,255,0.05)"),
+        yaxis=dict(title="Skor Normalisasi (0-1)", titlefont=dict(size=10), tickfont=dict(size=9), gridcolor="rgba(255,255,255,0.1)", range=[-0.05, 1.05]),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="center",
+            x=0.5,
+            font=dict(size=8),
+            bgcolor="rgba(0,0,0,0)",
+            borderwidth=0,
+        ),
         height=500,
-        margin=dict(l=50, r=40, t=80, b=120),
+        margin=dict(l=40, r=20, t=50, b=100),
     )
     
     return fig
@@ -253,7 +263,7 @@ def create_cluster_heatmap(df: pd.DataFrame) -> go.Figure:
                     y=y_idx,
                     text=text_val,
                     showarrow=False,
-                    font=dict(color=text_color, size=11, family="Inter, sans-serif"),
+                    font=dict(color=text_color, size=9, family="Inter, sans-serif"),
                 )
             )
         custom_text.append(row_text)
@@ -281,11 +291,11 @@ def create_cluster_heatmap(df: pd.DataFrame) -> go.Figure:
 
     _apply_defaults(
         fig,
-        title="Heatmap Nilai Rata-rata Fitur per Cluster",
-        xaxis=dict(title="Cluster", side="bottom"),
-        yaxis=dict(title="", gridcolor="rgba(0,0,0,0)", tickfont=dict(size=11)),
+        title=dict(text=""), # Hapus judul internal agar tidak tumpang tindih
+        xaxis=dict(title="Cluster", side="bottom", titlefont=dict(size=10), tickfont=dict(size=9)),
+        yaxis=dict(title="", gridcolor="rgba(0,0,0,0)", tickfont=dict(size=9)),
         height=500,
-        margin=dict(l=140, r=40, t=80, b=120),
+        margin=dict(l=120, r=20, t=50, b=100),
         annotations=annotations
     )
 
