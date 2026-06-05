@@ -394,6 +394,200 @@ def create_pca_scatter_3d(
     return fig
 
 
+def create_revenue_treemap(df: pd.DataFrame) -> go.Figure:
+    """
+    Membuat Treemap kontribusi total spending (Revenue) per cluster.
+    """
+    if "Cluster" not in df.columns or "Total_Spent" not in df.columns:
+        return go.Figure()
+
+    revenue_by_cluster = df.groupby("Cluster")["Total_Spent"].sum().reset_index()
+    total_revenue = revenue_by_cluster["Total_Spent"].sum()
+    if total_revenue == 0:
+        total_revenue = 1
+
+    labels = []
+    values = []
+    colors = []
+    parents = []
+    ids = []
+
+    for _, row in revenue_by_cluster.iterrows():
+        c_id = int(row["Cluster"])
+        persona = CLUSTER_PERSONAS.get(c_id, {"name": f"Cluster {c_id}", "color": "#888888"})
+        pct = (row["Total_Spent"] / total_revenue * 100)
+        label = f"<b>C{c_id}: {persona['name']}</b><br>Spent: ${row['Total_Spent']:,}<br>Contrib: {pct:.1f}%"
+        labels.append(label)
+        values.append(row["Total_Spent"])
+        colors.append(persona["color"])
+        parents.append("")
+        ids.append(f"C{c_id}")
+
+    fig = go.Figure(
+        data=[
+            go.Treemap(
+                labels=labels,
+                values=values,
+                parents=parents,
+                ids=ids,
+                marker=dict(colors=colors),
+                textinfo="label",
+                hovertemplate="<b>%{label}</b><extra></extra>"
+            )
+        ]
+    )
+
+    _apply_defaults(
+        fig,
+        title="Kontribusi Revenue (Total Spent) per Cluster",
+        height=420,
+        margin=dict(l=20, r=20, t=60, b=20),
+    )
+    return fig
+
+
+def create_value_engagement_bubble(df: pd.DataFrame) -> go.Figure:
+    """
+    Membuat Bubble Chart perbandingan Value (Average Spent) vs Engagement (Average Purchases).
+    Ukuran bubble mewakili jumlah pelanggan di cluster tersebut.
+    """
+    required_cols = ["Cluster", "Total_Spent", "Total_Purchases"]
+    if not all(col in df.columns for col in required_cols):
+        return go.Figure()
+
+    cluster_stats = df.groupby("Cluster").agg(
+        Avg_Spent=("Total_Spent", "mean"),
+        Avg_Purchases=("Total_Purchases", "mean"),
+        Customer_Count=("Cluster", "count")
+    ).reset_index()
+
+    fig = go.Figure()
+    
+    min_count = cluster_stats["Customer_Count"].min()
+    max_count = cluster_stats["Customer_Count"].max()
+
+    for _, row in cluster_stats.iterrows():
+        c_id = int(row["Cluster"])
+        persona = CLUSTER_PERSONAS.get(c_id, {"name": f"Cluster {c_id}", "color": "#888888", "emoji": "👤"})
+        
+        if max_count == min_count:
+            bubble_size = 40
+        else:
+            bubble_size = 25 + (row["Customer_Count"] - min_count) / (max_count - min_count) * 45
+
+        fig.add_trace(
+            go.Scatter(
+                x=[row["Avg_Purchases"]],
+                y=[row["Avg_Spent"]],
+                mode="markers+text",
+                name=f"C{c_id}: {persona['name']}",
+                text=[f"<b>C{c_id}</b>"],
+                textposition="middle center",
+                textfont=dict(color="#FAFAFA", size=11, family="Inter, sans-serif"),
+                marker=dict(
+                    color=persona["color"],
+                    size=bubble_size,
+                    opacity=0.85,
+                    line=dict(color="#FAFAFA", width=1.5),
+                ),
+                hovertemplate=(
+                    f"<b>{persona['emoji']} C{c_id}: {persona['name']}</b><br>"
+                    f"Rata-rata Transaksi: %{{x:.1f}}x<br>"
+                    f"Rata-rata Pengeluaran: $%{{y:,.0f}}<br>"
+                    f"Jumlah Pelanggan: {int(row['Customer_Count'])}<extra></extra>"
+                )
+            )
+        )
+
+    _apply_defaults(
+        fig,
+        title="Value vs. Engagement (Spending vs. Purchases)",
+        xaxis=dict(
+            title="Rata-rata Total Transaksi (Engagement)",
+            gridcolor="rgba(255,255,255,0.08)",
+            zeroline=False,
+        ),
+        yaxis=dict(
+            title="Rata-rata Total Pengeluaran ($) (Value)",
+            gridcolor="rgba(255,255,255,0.08)",
+            zeroline=False,
+        ),
+        height=420,
+        margin=dict(l=60, r=40, t=80, b=60),
+    )
+    return fig
+
+
+def create_product_composition_bar(df: pd.DataFrame) -> go.Figure:
+    """
+    Membuat Stacked Bar Chart 100% untuk komposisi pengeluaran produk per cluster.
+    """
+    if "Cluster" not in df.columns or not any(col in df.columns for col in SPENDING_COLS):
+        return go.Figure()
+
+    available_spending = [col for col in SPENDING_COLS if col in df.columns]
+    cluster_spending = df.groupby("Cluster")[available_spending].mean()
+    row_sums = cluster_spending.sum(axis=1).replace(0, 1)
+    normalized_spending = cluster_spending.div(row_sums, axis=0) * 100
+
+    fig = go.Figure()
+
+    cat_labels = {
+        "MntWines": "Wines",
+        "MntFruits": "Fruits",
+        "MntMeatProducts": "Meat",
+        "MntFishProducts": "Fish",
+        "MntSweetProducts": "Sweet",
+        "MntGoldProds": "Gold",
+    }
+
+    product_colors = ["#6C63FF", "#4ECDC4", "#FFD93D", "#FF6B6B", "#FF9F43", "#A55EEA"]
+
+    for idx, col in enumerate(available_spending):
+        clean_name = cat_labels.get(col, col)
+        fig.add_trace(
+            go.Bar(
+                y=[f"C{c}" for c in normalized_spending.index],
+                x=normalized_spending[col],
+                name=clean_name,
+                orientation="h",
+                marker=dict(
+                    color=product_colors[idx % len(product_colors)],
+                    line=dict(color="rgba(255,255,255,0.15)", width=1)
+                ),
+                hovertemplate=f"<b>{clean_name}</b>: %{{x:.1f}}%<extra></extra>",
+            )
+        )
+
+    _apply_defaults(
+        fig,
+        title="Komposisi Pengeluaran Produk per Cluster (100% Stacked)",
+        barmode="stack",
+        xaxis=dict(
+            title="Persentase Pengeluaran (%)",
+            gridcolor="rgba(255,255,255,0.08)",
+            range=[0, 100],
+        ),
+        yaxis=dict(
+            title="Cluster",
+            gridcolor="rgba(0,0,0,0)",
+        ),
+        height=420,
+        margin=dict(l=50, r=40, t=80, b=60),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="center",
+            x=0.5,
+            font=dict(size=9),
+            bgcolor="rgba(0,0,0,0)",
+            borderwidth=0,
+        ),
+    )
+    return fig
+
+
 # ---------------------------------------------------------------------------
 # Profiling Charts
 # ---------------------------------------------------------------------------
