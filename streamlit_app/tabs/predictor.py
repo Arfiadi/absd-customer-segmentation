@@ -229,7 +229,7 @@ def render(df: pd.DataFrame) -> None:
         # Submit
         submitted = st.form_submit_button(
             "🚀 Prediksi Segmen Pelanggan",
-            use_container_width=True,
+            width="stretch",
             type="primary",
         )
 

@@ -6,12 +6,17 @@ serta menyediakan fungsi prediksi untuk single-row dan batch.
 """
 
 import logging
+import warnings
 from typing import Optional, Tuple
 
 import joblib
 import numpy as np
 import pandas as pd
 import streamlit as st
+from sklearn.exceptions import InconsistentVersionWarning
+
+# Suppress version warnings when unpickling scikit-learn models
+warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
 
 from config.settings import (
     ALL_SCALER_FEATURES,
