@@ -162,7 +162,7 @@ def create_snake_plot(df: pd.DataFrame) -> go.Figure:
         fig,
         title=dict(text=""), # Hapus judul internal agar tidak tumpang tindih
         xaxis=dict(title="", tickangle=-45, tickfont=dict(size=9), gridcolor="rgba(255,255,255,0.05)"),
-        yaxis=dict(title="Skor Normalisasi (0-1)", titlefont=dict(size=10), tickfont=dict(size=9), gridcolor="rgba(255,255,255,0.1)", range=[-0.05, 1.05]),
+        yaxis=dict(title=dict(text="Skor Normalisasi (0-1)", font=dict(size=10)), tickfont=dict(size=9), gridcolor="rgba(255,255,255,0.1)", range=[-0.05, 1.05]),
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -292,7 +292,7 @@ def create_cluster_heatmap(df: pd.DataFrame) -> go.Figure:
     _apply_defaults(
         fig,
         title=dict(text=""), # Hapus judul internal agar tidak tumpang tindih
-        xaxis=dict(title="Cluster", side="bottom", titlefont=dict(size=10), tickfont=dict(size=9)),
+        xaxis=dict(title=dict(text="Cluster", font=dict(size=10)), side="bottom", tickfont=dict(size=9)),
         yaxis=dict(title="", gridcolor="rgba(0,0,0,0)", tickfont=dict(size=9)),
         height=500,
         margin=dict(l=120, r=20, t=50, b=100),
