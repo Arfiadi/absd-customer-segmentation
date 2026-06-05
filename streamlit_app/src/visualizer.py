@@ -75,7 +75,12 @@ def create_cluster_donut(df: pd.DataFrame) -> go.Figure:
             )
         ]
     )
-    _apply_defaults(fig, title="Distribusi Pelanggan per Cluster", height=420)
+    _apply_defaults(
+        fig,
+        title="Distribusi Pelanggan per Cluster",
+        height=420,
+        margin=dict(l=40, r=40, t=80, b=60),
+    )
     return fig
 
 
@@ -90,7 +95,8 @@ def create_cluster_bar(df: pd.DataFrame) -> go.Figure:
         Figure Plotly bar chart.
     """
     counts = df["Cluster"].value_counts().sort_index()
-    names = [f"C{i}: {CLUSTER_PERSONAS[i]['name']}" for i in counts.index]
+    names = [f"C{i}" for i in counts.index]
+    custom_names = [CLUSTER_PERSONAS[i]['name'] for i in counts.index]
     colors = [CLUSTER_COLORS[i] for i in counts.index]
     max_count = counts.max()
 
@@ -99,6 +105,7 @@ def create_cluster_bar(df: pd.DataFrame) -> go.Figure:
             go.Bar(
                 x=names,
                 y=counts.values,
+                customdata=custom_names,
                 marker=dict(
                     color=colors,
                     line=dict(color="rgba(255,255,255,0.2)", width=1),
@@ -106,7 +113,7 @@ def create_cluster_bar(df: pd.DataFrame) -> go.Figure:
                 text=counts.values,
                 textposition="outside",
                 textfont=dict(size=14, color="#FAFAFA"),
-                hovertemplate="<b>%{x}</b><br>Jumlah: %{y}<extra></extra>",
+                hovertemplate="<b>%{x}: %{customdata}</b><br>Jumlah: %{y}<extra></extra>",
             )
         ]
     )
@@ -120,6 +127,7 @@ def create_cluster_bar(df: pd.DataFrame) -> go.Figure:
             range=[0, max_count * 1.15],
         ),
         height=420,
+        margin=dict(l=50, r=40, t=80, b=60),
     )
     return fig
 
