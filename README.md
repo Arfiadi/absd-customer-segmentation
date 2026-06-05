@@ -1,4 +1,4 @@
-# 🎯 AI-Powered Customer Segmentation Dashboard
+# 🎯 Customer Segmentation Dashboard
 
 Proyek ini adalah implementasi *end-to-end* dari analisis segmentasi pelanggan menggunakan algoritma **K-Means Clustering** yang dioptimasi dengan **Principal Component Analysis (PCA)** dan **Robust Scaling**. 
 
