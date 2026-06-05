@@ -54,7 +54,7 @@ def _engineer_features(df: pd.DataFrame) -> pd.DataFrame:
 
     # Customer_Tenure
     if "Customer_Tenure" not in data.columns and "Dt_Customer" in data.columns:
-        data["Dt_Customer"] = pd.to_datetime(data["Dt_Customer"], dayfirst=True)
+        data["Dt_Customer"] = pd.to_datetime(data["Dt_Customer"], format='mixed')
         data["Customer_Tenure"] = (data["Dt_Customer"].max() - data["Dt_Customer"]).dt.days
 
     # Total_Spent
@@ -100,6 +100,9 @@ def load_customer_data() -> pd.DataFrame:
     """
     df = pd.read_csv(DATA_PATH)
     logger.info("Loaded %d rows from %s", len(df), DATA_PATH)
+
+    # Hapus baris yang mengandung NaN (seperti pada kolom Income)
+    df = df.dropna().reset_index(drop=True)
 
     # Feature engineering
     df = _engineer_features(df)
