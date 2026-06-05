@@ -1,5 +1,9 @@
 # 🎯 Customer Segmentation Dashboard
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://absd-customer-seg.streamlit.app/)
+
+**🌐 Live Deployment:** [https://absd-customer-seg.streamlit.app/](https://absd-customer-seg.streamlit.app/)
+
 Proyek ini adalah implementasi *end-to-end* dari analisis segmentasi pelanggan menggunakan algoritma **K-Means Clustering** yang dioptimasi dengan **Principal Component Analysis (PCA)** dan **Robust Scaling**. 
 
 Fase riset dan eksperimen dilakukan menggunakan Jupyter Notebook, dan *Champion Model* yang terpilih (berbasis 21 fitur perilaku dan demografi) di-*deploy* ke dalam bentuk aplikasi web interaktif (*Executive Dashboard*) menggunakan **Streamlit**.
@@ -18,30 +22,18 @@ Proyek ini menggunakan arsitektur modular (memisahkan logika UI, backend, dan mo
 ```text
 absd-customer-segmentation/
 │
-├── app.py                      # 🚀 TITIK MASUK UTAMA (Main Entry Point)
-├── requirements.txt            # Daftar dependensi library untuk deployment cloud
-├── .gitignore                  # Mengabaikan file sistem, environment, dan model berukuran besar
+├── requirements.txt            # Dependensi library untuk deployment cloud (root)
+├── notebook/                   # 📓 Eksperimen & Analisis Awal (Jupyter)
+├── data/                       # 📂 PENYIMPANAN DATA MENTAH
 │
-├── data/                       # 📂 PENYIMPANAN DATA
-│   ├── marketing_campaign.csv  # Data mentah awal
-│   └── customer_clustered.csv  # Data hasil klastering untuk divisualisasikan di Dashboard
-│
-├── models/                     # 🧠 ARTEFAK AI (Hasil Ekstrak dari Notebook)
-│   ├── robust_scaler.pkl       # Scaler untuk 21 fitur
-│   ├── pca_model.pkl           # Komponen PCA
-│   └── kmeans_champion.pkl     # Model KMeans (4 Klaster)
-│
-├── src/                        # ⚙️ LOGIKA BACKEND & BANTUAN (Utils)
-│   ├── __init__.py             
-│   ├── data_loader.py          # Fungsi load data & model (memakai st.cache_data/resource)
-│   └── inference_pipeline.py   # Fungsi pemrosesan data input baru -> prediksi klaster
-│
-└── ui_components/              # 🎨 LOGIKA FRONTEND (Antarmuka Streamlit)
-    ├── __init__.py
-    ├── tab_dashboard.py        # Kode khusus UI "Executive Dashboard"
-    ├── tab_persona.py          # Kode khusus UI "Cluster Persona & MBA"
-    └── tab_predictor.py        # Kode khusus UI "Live Predictor"
-
+└── streamlit_app/              # 🖥️ APLIKASI WEB STREAMLIT
+    ├── app.py                  # 🚀 TITIK MASUK UTAMA (Main Entry Point)
+    ├── requirements.txt        # Dependensi aplikasi lokal
+    ├── config/                 # ⚙️ Konfigurasi warna, fitur, dan persona klaster
+    ├── data/                   # Data CSV hasil clustering
+    ├── models/                 # 🧠 Artefak model (.pkl) hasil training
+    ├── src/                    # Logika Backend (Data loader, inference, visualizer)
+    └── tabs/                   # 🎨 Logika Frontend (Dashboard, Profiling, Predictor)
 ```
 
 ## 🛠️ Instalasi & Cara Menjalankan Aplikasi Lokal
@@ -51,9 +43,8 @@ Jika Anda ingin menjalankan aplikasi dashboard Streamlit ini di komputer lokal A
 **1. Clone Repositori**
 
 ```bash
-git clone [https://github.com/username-anda/absd-customer-segmentation.git](https://github.com/username-anda/absd-customer-segmentation.git)
+git clone https://github.com/Arfiadi/absd-customer-segmentation.git
 cd absd-customer-segmentation
-
 ```
 
 **2. Buat Virtual Environment (Opsional namun sangat direkomendasikan)**
@@ -64,21 +55,19 @@ python -m venv venv
 venv\Scripts\activate
 # Mac/Linux:
 source venv/bin/activate
-
 ```
 
 **3. Install Dependensi**
 
 ```bash
 pip install -r requirements.txt
-
 ```
 
 **4. Jalankan Aplikasi Streamlit**
 
 ```bash
+cd streamlit_app
 streamlit run app.py
-
 ```
 
 Aplikasi akan otomatis terbuka di *browser* Anda pada alamat `http://localhost:8501`.
