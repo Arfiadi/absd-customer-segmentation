@@ -1,4 +1,4 @@
-### Experiments and Model Deployment
+### Experiments and  Deployment
 
 This directory contains the experimentation notebooks for this project. 
 
