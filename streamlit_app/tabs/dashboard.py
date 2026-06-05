@@ -14,9 +14,9 @@ from config.settings import CLUSTER_PERSONAS, FEATURES_B, SPENDING_COLS
 from src.inference import load_models
 from src.visualizer import (
     create_cluster_bar,
-    create_cluster_donut,
     create_pca_scatter_2d,
     create_pca_scatter_3d,
+    create_snake_plot,
 )
 
 
@@ -112,14 +112,12 @@ def render(df: pd.DataFrame) -> None:
 
     st.divider()
 
-    # --- Row 2: Cluster Distribution ---
-    st.markdown("### 🎯 Distribusi Cluster")
-    dist_cols = st.columns(2)
+    # --- Row 2: Cluster Distribution & Macro Comparison ---
+    st.markdown("### 🎯 Distribusi Populasi Pelanggan")
+    st.plotly_chart(create_cluster_bar(df), use_container_width=True)
 
-    with dist_cols[0]:
-        st.plotly_chart(create_cluster_donut(df), use_container_width=True)
-    with dist_cols[1]:
-        st.plotly_chart(create_cluster_bar(df), use_container_width=True)
+    st.markdown("### 🐍 Perbandingan Makro Profil (Snake Plot)")
+    st.plotly_chart(create_snake_plot(df), use_container_width=True)
 
     st.divider()
 

@@ -46,47 +46,9 @@ def _apply_defaults(fig: go.Figure, **overrides) -> go.Figure:
 # ---------------------------------------------------------------------------
 # Dashboard Charts
 # ---------------------------------------------------------------------------
-def create_cluster_donut(df: pd.DataFrame) -> go.Figure:
-    """
-    Membuat Donut Chart distribusi populasi per cluster.
-
-    Args:
-        df: DataFrame dengan kolom 'Cluster'.
-
-    Returns:
-        Figure Plotly donut chart.
-    """
-    counts = df["Cluster"].value_counts().sort_index()
-    labels = [
-        f"{CLUSTER_PERSONAS[i]['emoji']} C{i}: {CLUSTER_PERSONAS[i]['name']}"
-        for i in counts.index
-    ]
-
-    fig = go.Figure(
-        data=[
-            go.Pie(
-                labels=labels,
-                values=counts.values,
-                hole=0.55,
-                marker=dict(colors=[CLUSTER_COLORS[i] for i in counts.index]),
-                textinfo="percent+value",
-                textfont=dict(size=13),
-                hovertemplate="<b>%{label}</b><br>Jumlah: %{value}<br>Proporsi: %{percent}<extra></extra>",
-            )
-        ]
-    )
-    _apply_defaults(
-        fig,
-        title="Distribusi Pelanggan per Cluster",
-        height=420,
-        margin=dict(l=40, r=40, t=80, b=60),
-    )
-    return fig
-
-
 def create_cluster_bar(df: pd.DataFrame) -> go.Figure:
     """
-    Membuat bar chart distribusi cluster dengan statistik.
+    Membuat bar chart distribusi cluster dengan statistik persentase.
 
     Args:
         df: DataFrame dengan kolom 'Cluster'.
@@ -95,8 +57,13 @@ def create_cluster_bar(df: pd.DataFrame) -> go.Figure:
         Figure Plotly bar chart.
     """
     counts = df["Cluster"].value_counts().sort_index()
+    total = len(df)
     names = [f"C{i}" for i in counts.index]
+    percentages = (counts / total * 100).round(1)
+    
     custom_names = [CLUSTER_PERSONAS[i]['name'] for i in counts.index]
+    custom_data = np.stack((custom_names, percentages), axis=-1)
+    
     colors = [CLUSTER_COLORS[i] for i in counts.index]
     max_count = counts.max()
 
@@ -105,21 +72,21 @@ def create_cluster_bar(df: pd.DataFrame) -> go.Figure:
             go.Bar(
                 x=names,
                 y=counts.values,
-                customdata=custom_names,
+                customdata=custom_data,
                 marker=dict(
                     color=colors,
                     line=dict(color="rgba(255,255,255,0.2)", width=1),
                 ),
-                text=counts.values,
+                text=[f"{val:,} users ({pct}%)" for val, pct in zip(counts.values, percentages)],
                 textposition="outside",
                 textfont=dict(size=14, color="#FAFAFA"),
-                hovertemplate="<b>%{x}: %{customdata}</b><br>Jumlah: %{y}<extra></extra>",
+                hovertemplate="<b>%{x}: %{customdata[0]}</b><br>Jumlah: %{y} (%{customdata[1]}%)<extra></extra>",
             )
         ]
     )
     _apply_defaults(
         fig,
-        title="Jumlah Pelanggan per Cluster",
+        title="Distribusi Populasi Pelanggan per Cluster",
         xaxis=dict(title="Cluster"),
         yaxis=dict(
             title="Jumlah Pelanggan",
@@ -129,6 +96,72 @@ def create_cluster_bar(df: pd.DataFrame) -> go.Figure:
         height=420,
         margin=dict(l=50, r=40, t=80, b=60),
     )
+    return fig
+
+
+def create_snake_plot(df: pd.DataFrame) -> go.Figure:
+    """
+    Membuat Snake Plot (Line Chart) perbandingan mean fitur kontinu antar cluster.
+
+    Args:
+        df: DataFrame pelanggan.
+
+    Returns:
+        Figure Plotly line chart (Snake Plot).
+    """
+    # Kolom kontinu kunci (dari metadata aplikasi)
+    continuous_features = [
+        "Income", "Recency", "Customer_Tenure",
+        "NumWebPurchases", "NumStorePurchases", "NumCatalogPurchases",
+        "MntWines", "MntMeatProducts", "MntFishProducts", "MntSweetProducts", "MntGoldProds"
+    ]
+    available_features = [f for f in continuous_features if f in df.columns]
+
+    if not available_features:
+        return go.Figure()
+
+    # Hitung rata-rata per cluster
+    cluster_means = df.groupby("Cluster")[available_features].mean()
+
+    # Normalisasi Min-Max (0-1) agar fitur dalam skala yang sama (Y-axis)
+    min_vals = cluster_means.min()
+    max_vals = cluster_means.max()
+    range_vals = max_vals - min_vals
+    range_vals = range_vals.replace(0, 1) # Hindari division by zero
+
+    normalized_means = (cluster_means - min_vals) / range_vals
+
+    # Reset index dan unpivot data untuk Plotly Express
+    normalized_means = normalized_means.reset_index()
+    melted_df = normalized_means.melt(id_vars="Cluster", var_name="Feature", value_name="Normalized Value")
+
+    # Mapping Persona untuk warna dan legend
+    melted_df["Persona"] = melted_df["Cluster"].apply(lambda x: f"C{x}: {CLUSTER_PERSONAS[x]['name']}")
+
+    fig = px.line(
+        melted_df,
+        x="Feature",
+        y="Normalized Value",
+        color="Persona",
+        color_discrete_map={f"C{i}: {CLUSTER_PERSONAS[i]['name']}": CLUSTER_PERSONAS[i]["color"] for i in CLUSTER_PERSONAS},
+        markers=True,
+    )
+    
+    fig.update_traces(
+        hovertemplate="<b>%{x}</b><br>Skor Relatif: %{y:.2f}<extra></extra>",
+        line=dict(width=3),
+        marker=dict(size=8)
+    )
+
+    _apply_defaults(
+        fig,
+        title="Snake Plot — Perbandingan Makro Profil Cluster",
+        xaxis=dict(title="", tickangle=-30, gridcolor="rgba(255,255,255,0.05)"),
+        yaxis=dict(title="Skor Normalisasi (0-1)", gridcolor="rgba(255,255,255,0.1)", range=[-0.05, 1.15]),
+        height=500,
+        margin=dict(l=50, r=40, t=80, b=120),
+    )
+    
     return fig
 
 
