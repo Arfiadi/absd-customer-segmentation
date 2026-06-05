@@ -16,7 +16,6 @@ from src.visualizer import (
     create_cluster_bar,
     create_pca_scatter_2d,
     create_pca_scatter_3d,
-    create_snake_plot,
 )
 
 
@@ -112,12 +111,9 @@ def render(df: pd.DataFrame) -> None:
 
     st.divider()
 
-    # --- Row 2: Cluster Distribution & Macro Comparison ---
+    # --- Row 2: Cluster Distribution ---
     st.markdown("### 🎯 Distribusi Populasi Pelanggan")
     st.plotly_chart(create_cluster_bar(df), use_container_width=True)
-
-    st.markdown("### 🐍 Perbandingan Makro Profil (Snake Plot)")
-    st.plotly_chart(create_snake_plot(df), use_container_width=True)
 
     st.divider()
 
