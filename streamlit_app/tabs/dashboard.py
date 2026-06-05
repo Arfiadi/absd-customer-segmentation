@@ -117,9 +117,9 @@ def render(df: pd.DataFrame) -> None:
     dist_cols = st.columns(2)
 
     with dist_cols[0]:
-        st.plotly_chart(create_cluster_donut(df), width="stretch")
+        st.plotly_chart(create_cluster_donut(df), use_container_width=True)
     with dist_cols[1]:
-        st.plotly_chart(create_cluster_bar(df), width="stretch")
+        st.plotly_chart(create_cluster_bar(df), use_container_width=True)
 
     st.divider()
 
@@ -134,7 +134,7 @@ def render(df: pd.DataFrame) -> None:
     with pca_cols[0]:
         st.plotly_chart(
             create_pca_scatter_2d(df, pca_data["pc1"], pca_data["pc2"]),
-            width="stretch",
+            use_container_width=True,
         )
 
     with pca_cols[1]:
@@ -142,5 +142,5 @@ def render(df: pd.DataFrame) -> None:
             create_pca_scatter_3d(
                 df, pca_data["pc1_3d"], pca_data["pc2_3d"], pca_data["pc3_3d"]
             ),
-            width="stretch",
+            use_container_width=True,
         )

@@ -139,13 +139,13 @@ def render(df: pd.DataFrame) -> None:
     with chart_cols[0]:
         st.plotly_chart(
             create_radar_chart(df, selected_id),
-            width="stretch",
+            use_container_width=True,
         )
 
     with chart_cols[1]:
         st.plotly_chart(
             create_spending_breakdown(df, selected_id),
-            width="stretch",
+            use_container_width=True,
         )
 
     st.divider()
@@ -157,17 +157,17 @@ def render(df: pd.DataFrame) -> None:
     with demo_cols[0]:
         st.plotly_chart(
             create_age_distribution(df, selected_id),
-            width="stretch",
+            use_container_width=True,
         )
 
     with demo_cols[1]:
         st.plotly_chart(
             create_education_bar(df, selected_id),
-            width="stretch",
+            use_container_width=True,
         )
 
     # --- Income Boxplot (full width) ---
     st.plotly_chart(
         create_income_boxplot(df),
-        width="stretch",
+        use_container_width=True,
     )
