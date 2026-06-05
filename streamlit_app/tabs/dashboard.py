@@ -94,6 +94,7 @@ def render(df: pd.DataFrame) -> None:
             label="Segmen Dominan",
             value=f"{dominant_persona['emoji']} C{dominant_cluster}",
             delta=dominant_persona["name"],
+            delta_color="off",
             help="Cluster dengan jumlah pelanggan terbanyak",
         )
     with kpi_cols[2]:
