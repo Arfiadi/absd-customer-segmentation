@@ -19,6 +19,7 @@ from src.visualizer import (
     create_radar_chart,
     create_spending_breakdown,
     create_snake_plot,
+    create_cluster_heatmap,
 )
 
 
@@ -108,8 +109,13 @@ def render(df: pd.DataFrame) -> None:
     Args:
         df: DataFrame pelanggan lengkap dengan kolom 'Cluster'.
     """
-    st.markdown("### 🐍 Perbandingan Makro Profil (Snake Plot)")
-    st.plotly_chart(create_snake_plot(df), use_container_width=True)
+    st.markdown("### 🗺️ Perbandingan Makro Profil Cluster")
+    
+    col1, col2 = st.columns([6, 5])
+    with col1:
+        st.plotly_chart(create_snake_plot(df), use_container_width=True)
+    with col2:
+        st.plotly_chart(create_cluster_heatmap(df), use_container_width=True)
 
     st.divider()
 

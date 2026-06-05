@@ -109,11 +109,16 @@ def create_snake_plot(df: pd.DataFrame) -> go.Figure:
     Returns:
         Figure Plotly line chart (Snake Plot).
     """
-    # Kolom kontinu kunci (dari metadata aplikasi)
+    # Kolom kontinu kunci (18 fitur numerik penting dari FEATURES_B)
     continuous_features = [
-        "Income", "Recency", "Customer_Tenure",
-        "NumWebPurchases", "NumStorePurchases", "NumCatalogPurchases",
-        "MntWines", "MntMeatProducts", "MntFishProducts", "MntSweetProducts", "MntGoldProds"
+        # Demographics
+        "Age", "Income", "Customer_Tenure", "Kidhome", "Teenhome",
+        # Spending
+        "MntWines", "MntFruits", "MntMeatProducts", "MntFishProducts", "MntSweetProducts", "MntGoldProds",
+        # Channels
+        "NumWebPurchases", "NumCatalogPurchases", "NumStorePurchases",
+        # Engagement/Behavior
+        "NumWebVisitsMonth", "Recency", "Total_Promos", "NumDealsPurchases"
     ]
     available_features = [f for f in continuous_features if f in df.columns]
 
@@ -156,12 +161,134 @@ def create_snake_plot(df: pd.DataFrame) -> go.Figure:
     _apply_defaults(
         fig,
         title="Snake Plot — Perbandingan Makro Profil Cluster",
-        xaxis=dict(title="", tickangle=-30, gridcolor="rgba(255,255,255,0.05)"),
+        xaxis=dict(title="", tickangle=-45, gridcolor="rgba(255,255,255,0.05)"),
         yaxis=dict(title="Skor Normalisasi (0-1)", gridcolor="rgba(255,255,255,0.1)", range=[-0.05, 1.15]),
         height=500,
         margin=dict(l=50, r=40, t=80, b=120),
     )
     
+    return fig
+
+
+def create_cluster_heatmap(df: pd.DataFrame) -> go.Figure:
+    """
+    Membuat Heatmap Rata-rata Fitur per Cluster dengan Row Normalization.
+    Menampilkan visualisasi densitas/peringkat per fitur secara relatif
+    sekaligus menampilkan angka rata-rata sebenarnya pada tabel.
+
+    Args:
+        df: DataFrame pelanggan.
+
+    Returns:
+        Figure Plotly heatmap.
+    """
+    continuous_features = [
+        # Demographics
+        "Age", "Income", "Customer_Tenure", "Kidhome", "Teenhome",
+        # Spending
+        "MntWines", "MntFruits", "MntMeatProducts", "MntFishProducts", "MntSweetProducts", "MntGoldProds",
+        # Channels
+        "NumWebPurchases", "NumCatalogPurchases", "NumStorePurchases",
+        # Engagement/Behavior
+        "NumWebVisitsMonth", "Recency", "Total_Promos", "NumDealsPurchases"
+    ]
+    available_features = [f for f in continuous_features if f in df.columns]
+
+    if not available_features:
+        return go.Figure()
+
+    # Hitung rata-rata per cluster
+    cluster_means = df.groupby("Cluster")[available_features].mean()
+
+    # Transpose agar Fitur di Y-axis (baris) dan Cluster di X-axis (kolom)
+    df_heat = cluster_means.T
+
+    # Normalisasi per baris (fitur) agar bisa dibandingkan walau beda skala
+    row_min = df_heat.min(axis=1)
+    row_max = df_heat.max(axis=1)
+    row_range = row_max - row_min
+    row_range = row_range.replace(0, 1) # Hindari division by zero
+    df_heat_norm = df_heat.sub(row_min, axis=0).div(row_range, axis=0)
+
+    # Label untuk Cluster (menggunakan short name agar tabel kompak)
+    cluster_names = [f"C{i}" for i in df_heat.columns]
+
+    # Format angka rata-rata untuk anotasi tabel
+    def format_val(feature: str, val: float) -> str:
+        if "Income" in feature:
+            return f"${val/1000:.1f}k" if val >= 1000 else f"${val:.0f}"
+        elif "Spent" in feature or feature.startswith("Mnt"):
+            return f"${val:.0f}"
+        elif "Tenure" in feature:
+            return f"{val:.0f}d"
+        elif "Age" in feature:
+            return f"{val:.1f}"
+        elif "Purchases" in feature or "Visits" in feature or "Deals" in feature:
+            return f"{val:.1f}x"
+        elif "Promos" in feature or "home" in feature:
+            return f"{val:.2f}"
+        elif "Recency" in feature:
+            return f"{val:.1f}d"
+        else:
+            return f"{val:.1f}"
+
+    # Buat custom data untuk hover template dan teks anotasi
+    custom_text = []
+    annotations = []
+    
+    for y_idx, feature in enumerate(df_heat.index):
+        row_text = []
+        for x_idx, cluster in enumerate(df_heat.columns):
+            raw_val = df_heat.loc[feature, cluster]
+            norm_val = df_heat_norm.loc[feature, cluster]
+            text_val = format_val(feature, raw_val)
+            row_text.append(text_val)
+            
+            # Tentukan warna teks (kontras)
+            text_color = "#111111" if norm_val > 0.6 else "#FAFAFA"
+            
+            annotations.append(
+                dict(
+                    x=x_idx,
+                    y=y_idx,
+                    text=text_val,
+                    showarrow=False,
+                    font=dict(color=text_color, size=11, family="Inter, sans-serif"),
+                )
+            )
+        custom_text.append(row_text)
+
+    # Custom colorscale: dari Navy Slate gelap (background dashboard) ke Purple brand ke Teal brand
+    custom_colorscale = [
+        [0.0, "#1A1F2E"],
+        [0.5, "#6C63FF"],
+        [1.0, "#4ECDC4"]
+    ]
+
+    fig = go.Figure(
+        data=go.Heatmap(
+            z=df_heat_norm.values,
+            x=cluster_names,
+            y=df_heat.index,
+            customdata=custom_text,
+            colorscale=custom_colorscale,
+            showscale=False, # Sembunyikan colorbar karena normalisasi per baris
+            xgap=2,
+            ygap=2,
+            hovertemplate="<b>%{y} (Cluster %{x})</b><br>Rata-rata: %{customdata}<br>Skor Relatif: %{z:.2f}<extra></extra>"
+        )
+    )
+
+    _apply_defaults(
+        fig,
+        title="Heatmap Nilai Rata-rata Fitur per Cluster",
+        xaxis=dict(title="Cluster", side="bottom"),
+        yaxis=dict(title="", gridcolor="rgba(0,0,0,0)", tickfont=dict(size=11)),
+        height=500,
+        margin=dict(l=140, r=40, t=80, b=120),
+        annotations=annotations
+    )
+
     return fig
 
 
