@@ -1,17 +1,11 @@
-"""
-recommendations.py — Tab 3: Strategic Business Recommendations.
-
-Menyajikan actionable marketing playbooks, retention strategies,
-dan omnichannel approaches yang disesuaikan untuk setiap cluster.
-Konten diambil dari analisis notebook (Cell 93).
-"""
-
+import pandas as pd
 import streamlit as st
 
 from config.settings import CLUSTER_COLORS, CLUSTER_PERSONAS
 
 
 def _render_strategy_card(
+    df: pd.DataFrame,
     cluster_id: int,
     expanded: bool = False,
 ) -> None:
@@ -22,13 +16,24 @@ def _render_strategy_card(
     Omnichannel Approaches dalam format terstruktur.
 
     Args:
+        df: DataFrame pelanggan.
         cluster_id: ID cluster (0-3).
         expanded: Apakah expander terbuka secara default.
     """
     persona = CLUSTER_PERSONAS[cluster_id]
 
+    # Calculate metrics dynamically
+    cluster_count = len(df[df["Cluster"] == cluster_id])
+    total_count = len(df)
+    cluster_percentage = (cluster_count / total_count) * 100 if total_count > 0 else 0
+
+    expander_title = (
+        f"{persona['emoji']} **Cluster {cluster_id}: {persona['name']}** | "
+        f"{cluster_count:,} users | {cluster_percentage:.1f}% of Population"
+    )
+
     with st.expander(
-        f"{persona['emoji']} **Cluster {cluster_id}: {persona['name']}** — {persona['subtitle']}",
+        expander_title,
         expanded=expanded,
     ):
         # Persona summary
@@ -151,13 +156,17 @@ def _render_key_takeaways() -> None:
         )
 
 
-def render(df=None) -> None:
+def render(df: pd.DataFrame = None) -> None:
     """
     Merender konten Tab 3: Strategic Business Recommendations.
 
     Args:
-        df: DataFrame pelanggan (opsional, untuk konsistensi interface).
+        df: DataFrame pelanggan.
     """
+    if df is None:
+        from src.data_loader import load_customer_data
+        df = load_customer_data()
+
     st.markdown("### 📋 Rekomendasi Strategi Bisnis per Cluster")
     st.caption(
         "Klik pada setiap cluster untuk melihat detail Marketing Playbook, "
@@ -166,7 +175,7 @@ def render(df=None) -> None:
 
     # Render each cluster strategy card
     for cluster_id in range(4):
-        _render_strategy_card(cluster_id, expanded=(cluster_id == 0))
+        _render_strategy_card(df, cluster_id, expanded=(cluster_id == 0))
 
     st.divider()
 

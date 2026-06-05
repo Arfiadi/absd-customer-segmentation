@@ -164,18 +164,32 @@ st.markdown(
 
 
 # ---------------------------------------------------------------------------
-# Application Header
+# Application Header & Sidebar
 # ---------------------------------------------------------------------------
 st.markdown(
     """
     <div class="app-header">
         <h1>📊 Customer Segmentation Analytics</h1>
-        <p>Interactive ML-Powered Customer Intelligence Dashboard &middot;
-           K-Means (4 Clusters) &middot; PCA &middot; RobustScaler</p>
+        <p>Interactive ML-Powered Customer Intelligence Dashboard</p>
     </div>
     """,
     unsafe_allow_html=True,
 )
+
+with st.sidebar:
+    with st.expander("⚙️ Model Architecture & Info", expanded=False):
+        st.markdown(
+            """
+            ### Pipeline Details
+            - **Algorithm:** K-Means Clustering
+            - **Number of Clusters:** 4 (Champion Model B)
+            - **Feature Scaling:** `RobustScaler` (28 features)
+            - **Dimensionality Reduction:** `PCA` (21 components transformed to 2D/3D visualization)
+            
+            ---
+            *Dashboard ini menggunakan data historis pelanggan yang dikelompokkan menjadi 4 segmen berdasarkan perilaku belanja dan demografis.*
+            """
+        )
 
 
 # ---------------------------------------------------------------------------
