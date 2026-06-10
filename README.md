@@ -12,7 +12,7 @@ Fase riset dan eksperimen dilakukan menggunakan Jupyter Notebook, dan *Champion 
 
 Aplikasi Streamlit ini dirancang dengan pendekatan *Separation of Concerns* (Modular) dan terbagi menjadi 3 fitur utama:
 1. **📊 Executive Dashboard:** Menampilkan metrik KPI makro bisnis, jumlah pelanggan, proporsi persentase ke-4 klaster, dan visualisasi distribusi segmen.
-2. **🧬 Cluster Persona & MBA:** Menganalisis DNA perilaku dari 4 klaster pelanggan (seperti *The Budget-Conscious Browsers*, dll). Menampilkan rata-rata pengeluaran dan *Market Basket Analysis* (aturan asosiasi produk/kampanye) secara spesifik untuk tiap klaster.
+2. **🧬 Cluster Persona :** Menganalisis DNA perilaku dari 4 klaster pelanggan (seperti *The Budget-Conscious Browsers*, dll) secara spesifik untuk tiap klaster.
 3. **🔮 Live Predictor:** Fitur *machine learning inference* secara *real-time*. Tim marketing dapat memasukkan data pelanggan baru ke dalam formulir, dan sistem akan memprediksi masuk ke klaster mana pelanggan tersebut.
 
 ## 📂 Struktur Tree Proyek
@@ -72,7 +72,7 @@ streamlit run app.py
 
 Aplikasi akan otomatis terbuka di *browser* Anda pada alamat `http://localhost:8501`.
 
-## 🔬 Catatan Metodologi Riset
+## 🔬 Catatan Metodologi
 
 Analisis data dilakukan melalui perbandingan berbagai skenario arsitektur fitur. Model final (**Experiment B**) ditetapkan sebagai *Champion Model* dengan spesifikasi:
 
